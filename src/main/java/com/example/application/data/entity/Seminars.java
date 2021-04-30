@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 @Entity
 public class Seminars extends AbstractEntity {
 
+    //TODO: Uppdatera vid ändringar av databasstruktur + kodgranskning.
     private String name;
     private String presenter;
     private String description;
