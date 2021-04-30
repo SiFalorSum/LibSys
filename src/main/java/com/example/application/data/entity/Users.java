@@ -2,6 +2,9 @@ package com.example.application.data.entity;
 
 import com.example.application.data.AbstractEntity;
 
+import javax.persistence.Entity;
+
+@Entity
 public class Users extends AbstractEntity {
 
     //TODO: Uppdatera vid ändringar av databasstruktur + kodgranskning.
