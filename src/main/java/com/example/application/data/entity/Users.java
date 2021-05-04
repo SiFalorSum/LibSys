@@ -17,13 +17,14 @@ public class Users extends AbstractEntity {
     private String city;
     private int active_borrowed_books;
     private int total_borrowed_books;
+    private boolean loancard;
     //password;
     private Long role_id;
     //saknas: personnummer, låneblockering?
 
     protected Users() {}
 
-    public Users(String first_name, String last_name, String email, String phone, String street, String postal_code, String city, Long role_id) {
+    public Users(String first_name, String last_name, String email, String phone, String street, String postal_code, String city,Boolean loanCard, Long role_id) {
         this.first_name = first_name;
         this.last_name = last_name;
         this.email = email;
@@ -32,6 +33,7 @@ public class Users extends AbstractEntity {
         this.postal_code = postal_code;
         this.city = city;
         this.role_id = role_id;
+        this.loancard = loanCard;
     }
 
     public String getFirst_name() {
@@ -113,4 +115,8 @@ public class Users extends AbstractEntity {
     public void setRole_id(Long role_id) {
         this.role_id = role_id;
     }
+
+    public void setLoancardFalse (boolean loancard){this.loancard = false;}
+    public void setLoancardTrue (boolean loancard){this.loancard = true;}
+    public boolean getLoancard (){return loancard;}
 }
