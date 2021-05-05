@@ -3,7 +3,8 @@ package com.example.application.views.useradmin;
 import java.util.Optional;
 
 import com.example.application.data.entity.SamplePerson;
-import com.example.application.data.service.SamplePersonService;
+import com.example.application.data.entity.Users;
+import com.example.application.data.entity.UsersRepository;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -22,6 +23,7 @@ import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 
+import org.h2.engine.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.artur.helpers.CrudServiceDataProvider;
 import com.vaadin.flow.router.Route;
@@ -33,15 +35,15 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.component.checkbox.Checkbox;
 
-@Route(value = "user-admin/:samplePersonID?/:action?(edit)", layout = MainView.class)
+@Route(value = "user-admin/:usersID?/:action?(edit)", layout = MainView.class)
 @PageTitle("User Admin")
 @CssImport("./views/useradmin/user-admin-view.css")
 public class UserAdminView extends Div implements BeforeEnterObserver {
 
-    private final String SAMPLEPERSON_ID = "samplePersonID";
-    private final String SAMPLEPERSON_EDIT_ROUTE_TEMPLATE = "user-admin/%d/edit";
+    private final String USER_ID = "samplePersonID";
+    private final String USER_EDIT_ROUTE_TEMPLATE = "user-admin/%d/edit";
 
-    private Grid<SamplePerson> grid = new Grid<>(SamplePerson.class, false);
+    private Grid<Users> grid = new Grid<>(Users.class, false);
 
     private TextField firstName;
     private TextField lastName;
@@ -56,12 +58,12 @@ public class UserAdminView extends Div implements BeforeEnterObserver {
 
     private BeanValidationBinder<SamplePerson> binder;
 
-    private SamplePerson samplePerson;
+    private Users users;
 
-    private SamplePersonService samplePersonService;
+    private UsersRepository usersRepository;
 
-    public UserAdminView(@Autowired SamplePersonService samplePersonService) {
-        this.samplePersonService = samplePersonService;
+    public UserAdminView(@Autowired UsersRepository usersRepository) {
+        this.usersRepository = usersRepository;
         addClassName("user-admin-view");
         // Create UI
         SplitLayout splitLayout = new SplitLayout();
@@ -79,19 +81,19 @@ public class UserAdminView extends Div implements BeforeEnterObserver {
         grid.addColumn("phone").setAutoWidth(true);
         grid.addColumn("dateOfBirth").setAutoWidth(true);
         grid.addColumn("occupation").setAutoWidth(true);
-        TemplateRenderer<SamplePerson> importantRenderer = TemplateRenderer.<SamplePerson>of(
+        TemplateRenderer<Users> importantRenderer = TemplateRenderer.<SamplePerson>of(
                 "<iron-icon hidden='[[!item.important]]' icon='vaadin:check' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: var(--lumo-primary-text-color);'></iron-icon><iron-icon hidden='[[item.important]]' icon='vaadin:minus' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: var(--lumo-disabled-text-color);'></iron-icon>")
-                .withProperty("important", SamplePerson::isImportant);
+                .withProperty("important", Users::isImportant);
         grid.addColumn(importantRenderer).setHeader("Important").setAutoWidth(true);
 
-        grid.setDataProvider(new CrudServiceDataProvider<>(samplePersonService));
+        grid.setDataProvider(new CrudServiceDataProvider<>(usersRepository));
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         grid.setHeightFull();
 
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(SAMPLEPERSON_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+                UI.getCurrent().navigate(String.format(USER_EDIT_ROUTE_TEMPLATE, event.getValue().get()));
             } else {
                 clearForm();
                 UI.getCurrent().navigate(UserAdminView.class);
@@ -99,7 +101,7 @@ public class UserAdminView extends Div implements BeforeEnterObserver {
         });
 
         // Configure Form
-        binder = new BeanValidationBinder<>(SamplePerson.class);
+        binder = new BeanValidationBinder<>(Users.class);
 
         // Bind fields. This where you'd define e.g. validation rules
 
@@ -112,12 +114,12 @@ public class UserAdminView extends Div implements BeforeEnterObserver {
 
         save.addClickListener(e -> {
             try {
-                if (this.samplePerson == null) {
-                    this.samplePerson = new SamplePerson();
+                if (this.users == null) {
+                    this.users = new Users();
                 }
-                binder.writeBean(this.samplePerson);
+                binder.writeBean(this.users);
 
-                samplePersonService.update(this.samplePerson);
+                usersRepository.update(this.users);
                 clearForm();
                 refreshGrid();
                 Notification.show("SamplePerson details stored.");
@@ -131,9 +133,9 @@ public class UserAdminView extends Div implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Optional<Integer> samplePersonId = event.getRouteParameters().getInteger(SAMPLEPERSON_ID);
+        Optional<Integer> samplePersonId = event.getRouteParameters().getInteger(USER_ID);
         if (samplePersonId.isPresent()) {
-            Optional<SamplePerson> samplePersonFromBackend = samplePersonService.get(samplePersonId.get());
+            Optional<SamplePerson> samplePersonFromBackend = usersRepository.get(usersID.get());
             if (samplePersonFromBackend.isPresent()) {
                 populateForm(samplePersonFromBackend.get());
             } else {
@@ -205,9 +207,9 @@ public class UserAdminView extends Div implements BeforeEnterObserver {
         populateForm(null);
     }
 
-    private void populateForm(SamplePerson value) {
-        this.samplePerson = value;
-        binder.readBean(this.samplePerson);
+    private void populateForm(Users value) {
+        this.users = value;
+        binder.readBean(this.users);
 
     }
 }
